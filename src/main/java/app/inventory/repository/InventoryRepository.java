@@ -33,4 +33,26 @@ public final class InventoryRepository {
             }
         }
     }
+
+    public InventoryItem addStock(String skuId, int quantity) throws SQLException {
+        try (Connection conn = database.connect();
+             PreparedStatement ps = conn.prepareStatement("""
+                     INSERT INTO inventory (sku_id, quantity) VALUES (?, ?)
+                     ON CONFLICT(sku_id) DO UPDATE
+                         SET quantity = inventory.quantity + excluded.quantity
+                     RETURNING sku_id, quantity
+                     """)) {
+            ps.setString(1, skuId);
+            ps.setInt(2, quantity);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) {
+                    throw new SQLException("Upsert returned no row for sku=" + skuId);
+                }
+                return new InventoryItem(
+                        rs.getString("sku_id"),
+                        rs.getInt("quantity")
+                );
+            }
+        }
+    }
 }
