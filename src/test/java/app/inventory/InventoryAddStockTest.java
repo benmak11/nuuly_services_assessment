@@ -5,7 +5,6 @@ import app.inventory.model.InventoryItem;
 import app.inventory.repository.InventoryRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.javalin.Javalin;
-import io.javalin.testtools.JavalinTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -27,11 +26,10 @@ class InventoryAddStockTest {
     void createsSkuWhenItDoesNotExist() throws Exception {
         Javalin app = Main.createApp(new InventoryRepository(setupDb()));
 
-        JavalinTest.test(app, (server, client) -> {
+        JavalinHarness.run(app, (server, client) -> {
             var response = client.post("/inventory/NEW-SKU", "{\"quantity\":5}");
-            assertEquals(200, response.code());
-            InventoryItem item = MAPPER.readValue(
-                    response.body().string(), InventoryItem.class);
+            assertEquals(200, response.statusCode());
+            InventoryItem item = MAPPER.readValue(response.body(), InventoryItem.class);
             assertEquals(new InventoryItem("NEW-SKU", 5), item);
         });
     }
@@ -42,11 +40,10 @@ class InventoryAddStockTest {
         seed(db, "WIDGET-1", 10);
         Javalin app = Main.createApp(new InventoryRepository(db));
 
-        JavalinTest.test(app, (server, client) -> {
+        JavalinHarness.run(app, (server, client) -> {
             var response = client.post("/inventory/WIDGET-1", "{\"quantity\":3}");
-            assertEquals(200, response.code());
-            InventoryItem item = MAPPER.readValue(
-                    response.body().string(), InventoryItem.class);
+            assertEquals(200, response.statusCode());
+            InventoryItem item = MAPPER.readValue(response.body(), InventoryItem.class);
             assertEquals(new InventoryItem("WIDGET-1", 13), item);
         });
     }
@@ -55,13 +52,12 @@ class InventoryAddStockTest {
     void persistsAcrossMultipleAdds() throws Exception {
         Javalin app = Main.createApp(new InventoryRepository(setupDb()));
 
-        JavalinTest.test(app, (server, client) -> {
+        JavalinHarness.run(app, (server, client) -> {
             client.post("/inventory/MULTI", "{\"quantity\":4}");
             client.post("/inventory/MULTI", "{\"quantity\":6}");
             var response = client.post("/inventory/MULTI", "{\"quantity\":1}");
-            assertEquals(200, response.code());
-            InventoryItem item = MAPPER.readValue(
-                    response.body().string(), InventoryItem.class);
+            assertEquals(200, response.statusCode());
+            InventoryItem item = MAPPER.readValue(response.body(), InventoryItem.class);
             assertEquals(new InventoryItem("MULTI", 11), item);
         });
     }
@@ -70,9 +66,9 @@ class InventoryAddStockTest {
     void returns400WhenQuantityIsZero() throws Exception {
         Javalin app = Main.createApp(new InventoryRepository(setupDb()));
 
-        JavalinTest.test(app, (server, client) -> {
+        JavalinHarness.run(app, (server, client) -> {
             var response = client.post("/inventory/SKU-A", "{\"quantity\":0}");
-            assertEquals(400, response.code());
+            assertEquals(400, response.statusCode());
         });
     }
 
@@ -80,9 +76,9 @@ class InventoryAddStockTest {
     void returns400WhenQuantityIsNegative() throws Exception {
         Javalin app = Main.createApp(new InventoryRepository(setupDb()));
 
-        JavalinTest.test(app, (server, client) -> {
+        JavalinHarness.run(app, (server, client) -> {
             var response = client.post("/inventory/SKU-A", "{\"quantity\":-3}");
-            assertEquals(400, response.code());
+            assertEquals(400, response.statusCode());
         });
     }
 
@@ -90,9 +86,9 @@ class InventoryAddStockTest {
     void returns400WhenBodyIsMalformed() throws Exception {
         Javalin app = Main.createApp(new InventoryRepository(setupDb()));
 
-        JavalinTest.test(app, (server, client) -> {
+        JavalinHarness.run(app, (server, client) -> {
             var response = client.post("/inventory/SKU-A", "{not json");
-            assertEquals(400, response.code());
+            assertEquals(400, response.statusCode());
         });
     }
 
@@ -100,9 +96,9 @@ class InventoryAddStockTest {
     void returns400WhenQuantityIsMissing() throws Exception {
         Javalin app = Main.createApp(new InventoryRepository(setupDb()));
 
-        JavalinTest.test(app, (server, client) -> {
+        JavalinHarness.run(app, (server, client) -> {
             var response = client.post("/inventory/SKU-A", "{}");
-            assertEquals(400, response.code());
+            assertEquals(400, response.statusCode());
         });
     }
 

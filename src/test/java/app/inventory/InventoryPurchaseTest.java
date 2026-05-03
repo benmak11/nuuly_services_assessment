@@ -5,7 +5,6 @@ import app.inventory.model.InventoryItem;
 import app.inventory.repository.InventoryRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.javalin.Javalin;
-import io.javalin.testtools.JavalinTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -31,11 +30,10 @@ class InventoryPurchaseTest {
         seed(db, "WIDGET-1", 10);
         Javalin app = Main.createApp(new InventoryRepository(db));
 
-        JavalinTest.test(app, (server, client) -> {
+        JavalinHarness.run(app, (server, client) -> {
             var response = client.post("/inventory/WIDGET-1/purchase", "{\"quantity\":3}");
-            assertEquals(200, response.code());
-            InventoryItem item = MAPPER.readValue(
-                    response.body().string(), InventoryItem.class);
+            assertEquals(200, response.statusCode());
+            InventoryItem item = MAPPER.readValue(response.body(), InventoryItem.class);
             assertEquals(new InventoryItem("WIDGET-1", 7), item);
         });
     }
@@ -46,11 +44,10 @@ class InventoryPurchaseTest {
         seed(db, "EXACT", 5);
         Javalin app = Main.createApp(new InventoryRepository(db));
 
-        JavalinTest.test(app, (server, client) -> {
+        JavalinHarness.run(app, (server, client) -> {
             var response = client.post("/inventory/EXACT/purchase", "{\"quantity\":5}");
-            assertEquals(200, response.code());
-            InventoryItem item = MAPPER.readValue(
-                    response.body().string(), InventoryItem.class);
+            assertEquals(200, response.statusCode());
+            InventoryItem item = MAPPER.readValue(response.body(), InventoryItem.class);
             assertEquals(new InventoryItem("EXACT", 0), item);
         });
     }
@@ -61,12 +58,11 @@ class InventoryPurchaseTest {
         seed(db, "PERSIST", 10);
         Javalin app = Main.createApp(new InventoryRepository(db));
 
-        JavalinTest.test(app, (server, client) -> {
+        JavalinHarness.run(app, (server, client) -> {
             client.post("/inventory/PERSIST/purchase", "{\"quantity\":4}");
             var response = client.get("/inventory/PERSIST");
-            assertEquals(200, response.code());
-            InventoryItem item = MAPPER.readValue(
-                    response.body().string(), InventoryItem.class);
+            assertEquals(200, response.statusCode());
+            InventoryItem item = MAPPER.readValue(response.body(), InventoryItem.class);
             assertEquals(new InventoryItem("PERSIST", 6), item);
         });
     }
@@ -75,10 +71,10 @@ class InventoryPurchaseTest {
     void returns404WhenSkuMissing() throws Exception {
         Javalin app = Main.createApp(new InventoryRepository(setupDb()));
 
-        JavalinTest.test(app, (server, client) -> {
+        JavalinHarness.run(app, (server, client) -> {
             var response = client.post("/inventory/MISSING/purchase", "{\"quantity\":1}");
-            assertEquals(404, response.code());
-            assertEquals("SKU not found", response.body().string());
+            assertEquals(404, response.statusCode());
+            assertEquals("SKU not found", response.body());
         });
     }
 
@@ -88,10 +84,10 @@ class InventoryPurchaseTest {
         seed(db, "LOW", 2);
         Javalin app = Main.createApp(new InventoryRepository(db));
 
-        JavalinTest.test(app, (server, client) -> {
+        JavalinHarness.run(app, (server, client) -> {
             var response = client.post("/inventory/LOW/purchase", "{\"quantity\":5}");
-            assertEquals(400, response.code());
-            assertEquals("Insufficient inventory", response.body().string());
+            assertEquals(400, response.statusCode());
+            assertEquals("Insufficient inventory", response.body());
         });
     }
 
@@ -101,7 +97,7 @@ class InventoryPurchaseTest {
         seed(db, "LOW", 2);
         Javalin app = Main.createApp(new InventoryRepository(db));
 
-        JavalinTest.test(app, (server, client) -> {
+        JavalinHarness.run(app, (server, client) -> {
             client.post("/inventory/LOW/purchase", "{\"quantity\":5}");
             assertEquals(2, readQuantity(db, "LOW"));
         });
@@ -113,9 +109,9 @@ class InventoryPurchaseTest {
         seed(db, "WIDGET", 5);
         Javalin app = Main.createApp(new InventoryRepository(db));
 
-        JavalinTest.test(app, (server, client) -> {
+        JavalinHarness.run(app, (server, client) -> {
             var response = client.post("/inventory/WIDGET/purchase", "{\"quantity\":0}");
-            assertEquals(400, response.code());
+            assertEquals(400, response.statusCode());
         });
     }
 
@@ -125,9 +121,9 @@ class InventoryPurchaseTest {
         seed(db, "WIDGET", 5);
         Javalin app = Main.createApp(new InventoryRepository(db));
 
-        JavalinTest.test(app, (server, client) -> {
+        JavalinHarness.run(app, (server, client) -> {
             var response = client.post("/inventory/WIDGET/purchase", "{\"quantity\":-2}");
-            assertEquals(400, response.code());
+            assertEquals(400, response.statusCode());
         });
     }
 
@@ -135,9 +131,9 @@ class InventoryPurchaseTest {
     void returns400WhenBodyIsMalformed() throws Exception {
         Javalin app = Main.createApp(new InventoryRepository(setupDb()));
 
-        JavalinTest.test(app, (server, client) -> {
+        JavalinHarness.run(app, (server, client) -> {
             var response = client.post("/inventory/WIDGET/purchase", "not json");
-            assertEquals(400, response.code());
+            assertEquals(400, response.statusCode());
         });
     }
 
@@ -145,10 +141,10 @@ class InventoryPurchaseTest {
     void invalidRequestTakesPriorityOverNotFound() throws Exception {
         Javalin app = Main.createApp(new InventoryRepository(setupDb()));
 
-        JavalinTest.test(app, (server, client) -> {
+        JavalinHarness.run(app, (server, client) -> {
             var response = client.post("/inventory/MISSING/purchase", "{\"quantity\":0}");
-            assertEquals(400, response.code());
-            assertTrue(response.body().string().toLowerCase().contains("quantity"));
+            assertEquals(400, response.statusCode());
+            assertTrue(response.body().toLowerCase().contains("quantity"));
         });
     }
 

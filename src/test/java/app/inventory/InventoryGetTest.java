@@ -5,7 +5,6 @@ import app.inventory.model.InventoryItem;
 import app.inventory.repository.InventoryRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.javalin.Javalin;
-import io.javalin.testtools.JavalinTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -27,10 +26,10 @@ class InventoryGetTest {
     void returns404WhenSkuMissing() throws Exception {
         Javalin app = Main.createApp(new InventoryRepository(setupDb()));
 
-        JavalinTest.test(app, (server, client) -> {
+        JavalinHarness.run(app, (server, client) -> {
             var response = client.get("/inventory/MISSING-SKU");
-            assertEquals(404, response.code());
-            assertEquals("SKU not found", response.body().string());
+            assertEquals(404, response.statusCode());
+            assertEquals("SKU not found", response.body());
         });
     }
 
@@ -40,11 +39,10 @@ class InventoryGetTest {
         seed(db, "WIDGET-1", 7);
         Javalin app = Main.createApp(new InventoryRepository(db));
 
-        JavalinTest.test(app, (server, client) -> {
+        JavalinHarness.run(app, (server, client) -> {
             var response = client.get("/inventory/WIDGET-1");
-            assertEquals(200, response.code());
-            InventoryItem item = MAPPER.readValue(
-                    response.body().string(), InventoryItem.class);
+            assertEquals(200, response.statusCode());
+            InventoryItem item = MAPPER.readValue(response.body(), InventoryItem.class);
             assertEquals(new InventoryItem("WIDGET-1", 7), item);
         });
     }
