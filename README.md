@@ -119,6 +119,6 @@ This project is being built in stages:
 
 - [x] **Stage 1** — Project scaffold: dependencies, Javalin bootstrap, SQLite
   schema migration.
-- [ ] **Stage 2** — `GET /inventory/{skuId}` end-to-end (vertical slice).
-- [ ] **Stage 3** — `POST /inventory/{skuId}` (create or add stock).
+- [x] **Stage 2** — `GET /inventory/{skuId}` end-to-end (vertical slice).
+- [x] **Stage 3** — `POST /inventory/{skuId}` (create or add stock).
 - [ ] **Stage 4** — `POST /inventory/{skuId}/purchase` (transactional deduct).
