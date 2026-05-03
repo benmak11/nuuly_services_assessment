@@ -11,14 +11,14 @@ The API surface:
 
 ## Tech stack
 
-| Layer       | Choice                                  |
-| ----------- | --------------------------------------- |
-| Language    | Java 21                                 |
-| Build       | Gradle 9 (via wrapper)                  |
-| Web         | [Javalin](https://javalin.io/) 6        |
-| Persistence | SQLite (via `org.xerial:sqlite-jdbc`)   |
-| JSON        | Jackson                                 |
-| Tests       | JUnit 5                                 |
+| Layer       | Choice                                |
+| ----------- |---------------------------------------|
+| Language    | Java 21                               |
+| Build       | Gradle 9 (via wrapper)                |
+| Web         | [Javalin](https://javalin.io/) 7      |
+| Persistence | SQLite (via `org.xerial:sqlite-jdbc`) |
+| JSON        | Jackson                               |
+| Tests       | JUnit 5                               |
 
 SQLite was chosen as the embedded datastore because it has a mature, pure-JDBC
 Java store (no native install required), strong ACID semantics, and a

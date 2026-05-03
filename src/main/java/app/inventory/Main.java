@@ -22,9 +22,10 @@ public class Main {
 
     public static Javalin createApp(InventoryRepository repository) {
         InventoryController controller = new InventoryController(repository);
-        return Javalin.create()
-                .get("/inventory/{skuId}", controller::getInventory)
-                .post("/inventory/{skuId}", controller::addStock)
-                .post("/inventory/{skuId}/purchase", controller::purchase);
+        return Javalin.create(config -> {
+            config.routes.get("/inventory/{skuId}", controller::getInventory)
+                    .post("/inventory/{skuId}", controller::addStock)
+                    .post("/inventory/{skuId}/purchase", controller::purchase);
+        });
     }
 }
