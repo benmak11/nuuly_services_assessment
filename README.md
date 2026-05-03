@@ -78,20 +78,39 @@ to change it for local dev, edit the `PORT` field there.
 
 Test results are written to `build/reports/tests/test/index.html`.
 
+## Testing the API with Bruno
+
+A [Bruno](https://www.usebruno.com/) collection is included under
+`NuulyInventoryServiceCollection/` for exercising the endpoints against a
+running local instance. Open the directory in Bruno to load the collection,
+which contains requests for reading a SKU, creating/adding stock, and
+processing a purchase.
+
 ## Project layout
 
 ```
 .
-├── build.gradle                 # Gradle build config
+├── build.gradle                          # Gradle build config
 ├── settings.gradle
-├── gradlew, gradlew.bat         # Gradle wrapper
+├── gradlew, gradlew.bat                  # Gradle wrapper
 ├── README.md
+├── docs/
+│   └── instructions.md                   # Assessment instructions
+├── NuulyInventoryServiceCollection/      # Bruno API collection
 └── src/
     ├── main/java/app/inventory/
-    │   ├── Main.java            # Entry point: migrates DB, starts Javalin
-    │   └── db/
-    │       └── Database.java    # SQLite connection + schema migration
-    └── test/java/               # (tests added per stage)
+    │   ├── Main.java                     # Entry point: migrates DB, starts Javalin
+    │   ├── db/
+    │   │   └── Database.java             # SQLite connection + schema migration
+    │   ├── http/
+    │   │   └── InventoryController.java  # Javalin route handlers
+    │   ├── model/
+    │   │   ├── InventoryItem.java
+    │   │   └── InventoryQuantity.java
+    │   └── repository/
+    │       ├── InventoryRepository.java  # SQL access for the inventory table
+    │       └── PurchaseResult.java
+    └── test/java/app/inventory/
 ```
 
 ## Database schema
