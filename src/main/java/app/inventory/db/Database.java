@@ -24,10 +24,6 @@ public final class Database {
         return new Database("jdbc:sqlite:" + path);
     }
 
-    public static Database inMemory() {
-        return new Database("jdbc:sqlite::memory:");
-    }
-
     public Connection connect() throws SQLException {
         Connection conn = DriverManager.getConnection(jdbcUrl);
         try (Statement stmt = conn.createStatement()) {

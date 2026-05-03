@@ -1,6 +1,8 @@
 package app.inventory;
 
 import app.inventory.db.Database;
+import app.inventory.http.InventoryController;
+import app.inventory.repository.InventoryRepository;
 import io.javalin.Javalin;
 
 public class Main {
@@ -12,8 +14,15 @@ public class Main {
         Database database = Database.file(DB_PATH);
         database.migrate();
 
-        Javalin app = Javalin.create().start(PORT);
+        InventoryRepository repository = new InventoryRepository(database);
+        Javalin app = createApp(repository).start(PORT);
 
         Runtime.getRuntime().addShutdownHook(new Thread(app::stop));
+    }
+
+    public static Javalin createApp(InventoryRepository repository) {
+        InventoryController controller = new InventoryController(repository);
+        return Javalin.create()
+                .get("/inventory/{skuId}", controller::getInventory);
     }
 }
