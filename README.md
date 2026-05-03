@@ -21,7 +21,7 @@ The API surface:
 | Tests       | JUnit 5                                 |
 
 SQLite was chosen as the embedded datastore because it has a mature, pure-JDBC
-Java story (no native install required), strong ACID semantics, and a
+Java store (no native install required), strong ACID semantics, and a
 single-writer model that makes the "insufficient inventory" race condition
 straightforward to reason about.
 
@@ -68,8 +68,7 @@ The `-wal` and `-shm` files are created by SQLite's WAL journal mode.
 ### Choosing a different port
 
 The port is currently a constant (`7070`) in `app.inventory.Main`. If you need
-to change it for local dev, edit the `PORT` field there. (Externalizing this to
-a config/env var is a follow-up.)
+to change it for local dev, edit the `PORT` field there.
 
 ## Running tests
 
@@ -108,14 +107,3 @@ CREATE TABLE IF NOT EXISTS inventory (
 
 Connections are opened with `PRAGMA foreign_keys = ON` and
 `PRAGMA journal_mode = WAL` for better read concurrency.
-
-## Implementation status
-
-All stages implemented:
-
-- [x] **Stage 1** — Project scaffold: dependencies, Javalin bootstrap, SQLite
-  schema migration.
-- [x] **Stage 2** — `GET /inventory/{skuId}` end-to-end (vertical slice).
-- [x] **Stage 3** — `POST /inventory/{skuId}` (create or add stock).
-- [x] **Stage 4** — `POST /inventory/{skuId}/purchase` (transactional deduct
-  with insufficient-stock guard).
