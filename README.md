@@ -53,10 +53,6 @@ On first start, a SQLite database file `inventory.db` is created in the working
 directory and the `inventory` table is migrated automatically. Subsequent runs
 reuse the same file, preserving data between restarts.
 
-> Note: the API endpoints are not yet implemented. At this stage the server
-> starts cleanly and the schema is in place; routes will be added in subsequent
-> stages.
-
 To stop the server, press `Ctrl+C`. A shutdown hook stops Javalin gracefully.
 
 ### Resetting local data
@@ -115,10 +111,11 @@ Connections are opened with `PRAGMA foreign_keys = ON` and
 
 ## Implementation status
 
-This project is being built in stages:
+All stages implemented:
 
 - [x] **Stage 1** — Project scaffold: dependencies, Javalin bootstrap, SQLite
   schema migration.
 - [x] **Stage 2** — `GET /inventory/{skuId}` end-to-end (vertical slice).
 - [x] **Stage 3** — `POST /inventory/{skuId}` (create or add stock).
-- [ ] **Stage 4** — `POST /inventory/{skuId}/purchase` (transactional deduct).
+- [x] **Stage 4** — `POST /inventory/{skuId}/purchase` (transactional deduct
+  with insufficient-stock guard).
