@@ -24,6 +24,7 @@ public class Main {
         InventoryController controller = new InventoryController(repository);
         return Javalin.create()
                 .get("/inventory/{skuId}", controller::getInventory)
-                .post("/inventory/{skuId}", controller::addStock);
+                .post("/inventory/{skuId}", controller::addStock)
+                .post("/inventory/{skuId}/purchase", controller::purchase);
     }
 }

@@ -55,4 +55,52 @@ public final class InventoryRepository {
             }
         }
     }
+
+    public PurchaseResult purchase(String skuId, int quantity) throws SQLException {
+        try (Connection conn = database.connect()) {
+            conn.setAutoCommit(false);
+            try {
+                InventoryItem updated = null;
+                try (PreparedStatement update = conn.prepareStatement("""
+                        UPDATE inventory
+                           SET quantity = quantity - ?
+                         WHERE sku_id = ? AND quantity >= ?
+                        RETURNING sku_id, quantity
+                        """)) {
+                    update.setInt(1, quantity);
+                    update.setString(2, skuId);
+                    update.setInt(3, quantity);
+                    try (ResultSet rs = update.executeQuery()) {
+                        if (rs.next()) {
+                            updated = new InventoryItem(
+                                    rs.getString("sku_id"),
+                                    rs.getInt("quantity"));
+                        }
+                    }
+                }
+
+                if (updated != null) {
+                    conn.commit();
+                    return new PurchaseResult.Success(updated);
+                }
+
+                boolean exists;
+                try (PreparedStatement select = conn.prepareStatement(
+                        "SELECT 1 FROM inventory WHERE sku_id = ?")) {
+                    select.setString(1, skuId);
+                    try (ResultSet rs = select.executeQuery()) {
+                        exists = rs.next();
+                    }
+                }
+
+                conn.commit();
+                return exists
+                        ? new PurchaseResult.Insufficient()
+                        : new PurchaseResult.NotFound();
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            }
+        }
+    }
 }
